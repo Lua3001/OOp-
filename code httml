@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hệ Thống Quản Lý Nhà Hàng</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --bg2: #111318;
+    --bg3: #181c24;
+    --border: #252a35;
+    --accent: #f97316;
+    --accent2: #fb923c;
+    --accent-soft: rgba(249,115,22,0.12);
+    --gold: #fbbf24;
+    --green: #22c55e;
+    --red: #ef4444;
+    --blue: #3b82f6;
+    --text: #e8eaf0;
+    --text2: #9ca3af;
+    --text3: #6b7280;
+    --card-shadow: 0 4px 24px rgba(0,0,0,0.5);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Be Vietnam Pro',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; }
+ 
+  /* SIDEBAR */
+  .sidebar {
+    width:240px; min-height:100vh; background:var(--bg2);
+    border-right:1px solid var(--border); display:flex; flex-direction:column;
+    position:fixed; left:0; top:0; bottom:0; z-index:100;
+  }
+  .sidebar-logo {
+    padding:24px 20px 20px;
+    border-bottom:1px solid var(--border);
+  }
+  .sidebar-logo .logo-icon {
+    width:40px; height:40px; background:var(--accent);
+    border-radius:10px; display:flex; align-items:center; justify-content:center;
+    font-size:20px; margin-bottom:10px;
+  }
+  .sidebar-logo h1 { font-size:14px; font-weight:700; color:var(--text); line-height:1.3; }
+  .sidebar-logo span { font-size:11px; color:var(--text3); font-family:'Space Mono',monospace; }
+ 
+  .nav-section { padding:16px 12px 8px; }
+  .nav-label { font-size:10px; font-weight:700; color:var(--text3); letter-spacing:1.5px; text-transform:uppercase; padding:0 8px; margin-bottom:6px; }
+  .nav-item {
+    display:flex; align-items:center; gap:10px; padding:9px 12px;
+    border-radius:8px; cursor:pointer; font-size:13px; font-weight:500;
+    color:var(--text2); transition:all 0.2s; margin-bottom:2px;
+  }
+  .nav-item:hover { background:var(--bg3); color:var(--text); }
+  .nav-item.active { background:var(--accent-soft); color:var(--accent); }
+  .nav-item .icon { font-size:16px; width:20px; text-align:center; }
+  .nav-badge {
+    margin-left:auto; background:var(--accent); color:white;
+    font-size:10px; padding:2px 7px; border-radius:20px; font-weight:700;
+  }
+ 
+  /* MAIN */
+  .main { margin-left:240px; flex:1; min-height:100vh; }
+  .topbar {
+    height:60px; background:var(--bg2); border-bottom:1px solid var(--border);
+    display:flex; align-items:center; padding:0 28px; gap:16px; position:sticky; top:0; z-index:50;
+  }
+  .topbar-title { font-size:16px; font-weight:700; flex:1; }
+  .topbar-actions { display:flex; gap:10px; align-items:center; }
+  .btn {
+    padding:8px 16px; border-radius:8px; font-size:13px; font-weight:600;
+    cursor:pointer; border:none; transition:all 0.2s; font-family:inherit;
+  }
+  .btn-primary { background:var(--accent); color:white; }
+  .btn-primary:hover { background:var(--accent2); transform:translateY(-1px); }
+  .btn-ghost { background:transparent; color:var(--text2); border:1px solid var(--border); }
+  .btn-ghost:hover { background:var(--bg3); color:var(--text); }
+  .btn-sm { padding:6px 12px; font-size:12px; }
+  .btn-danger { background:rgba(239,68,68,0.15); color:var(--red); border:1px solid rgba(239,68,68,0.3); }
+  .btn-danger:hover { background:rgba(239,68,68,0.25); }
+  .btn-success { background:rgba(34,197,94,0.15); color:var(--green); border:1px solid rgba(34,197,94,0.3); }
+ 
+  .page { padding:28px; display:none; }
+  .page.active { display:block; }
+ 
+  /* STATS */
+  .stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:28px; }
+  .stat-card {
+    background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+    padding:20px; position:relative; overflow:hidden;
+  }
+  .stat-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+  }
+  .stat-card.orange::before { background:var(--accent); }
+  .stat-card.gold::before { background:var(--gold); }
+  .stat-card.green::before { background:var(--green); }
+  .stat-card.blue::before { background:var(--blue); }
+  .stat-label { font-size:12px; color:var(--text3); font-weight:500; margin-bottom:8px; }
+  .stat-value { font-size:26px; font-weight:800; font-family:'Space Mono',monospace; }
+  .stat-card.orange .stat-value { color:var(--accent); }
+  .stat-card.gold .stat-value { color:var(--gold); }
+  .stat-card.green .stat-value { color:var(--green); }
+  .stat-card.blue .stat-value { color:var(--blue); }
+  .stat-sub { font-size:11px; color:var(--text3); margin-top:6px; }
+ 
+  /* TABLES */
+  .card {
+    background:var(--bg2); border:1px solid var(--border); border-radius:12px; overflow:hidden;
+    margin-bottom:20px;
+  }
+  .card-header {
+    padding:18px 20px; border-bottom:1px solid var(--border);
+    display:flex; align-items:center; gap:12px;
+  }
+  .card-header h3 { font-size:14px; font-weight:700; flex:1; }
+  .search-box {
+    background:var(--bg3); border:1px solid var(--border); border-radius:8px;
+    padding:7px 12px; color:var(--text); font-size:13px; font-family:inherit;
+    outline:none; width:220px;
+  }
+  .search-box:focus { border-color:var(--accent); }
+  .search-box::placeholder { color:var(--text3); }
+ 
+  table { width:100%; border-collapse:collapse; }
+  th { padding:11px 16px; text-align:left; font-size:11px; font-weight:700; color:var(--text3); letter-spacing:0.8px; text-transform:uppercase; background:var(--bg3); border-bottom:1px solid var(--border); }
+  td { padding:12px 16px; font-size:13px; border-bottom:1px solid rgba(37,42,53,0.5); vertical-align:middle; }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:rgba(255,255,255,0.02); }
+ 
+  .badge {
+    display:inline-flex; align-items:center; padding:3px 10px; border-radius:20px;
+    font-size:11px; font-weight:700; gap:5px;
+  }
+  .badge-green { background:rgba(34,197,94,0.15); color:var(--green); }
+  .badge-red { background:rgba(239,68,68,0.15); color:var(--red); }
+  .badge-orange { background:var(--accent-soft); color:var(--accent); }
+  .badge-blue { background:rgba(59,130,246,0.15); color:var(--blue); }
+  .badge-gold { background:rgba(251,191,36,0.15); color:var(--gold); }
+ 
+  .dot { width:6px; height:6px; border-radius:50%; display:inline-block; }
+  .dot-green { background:var(--green); }
+  .dot-red { background:var(--red); }
+ 
+  /* MODAL */
+  .modal-overlay {
+    position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:1000;
+    display:none; align-items:center; justify-content:center; backdrop-filter:blur(4px);
+  }
+  .modal-overlay.open { display:flex; }
+  .modal {
+    background:var(--bg2); border:1px solid var(--border); border-radius:16px;
+    width:520px; max-height:85vh; overflow-y:auto;
+    animation:slideUp 0.25s ease;
+  }
+  @keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
+  .modal-header {
+    padding:20px 24px 16px; border-bottom:1px solid var(--border);
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .modal-header h3 { font-size:16px; font-weight:700; }
+  .modal-close { background:none; border:none; color:var(--text3); font-size:20px; cursor:pointer; padding:4px 8px; border-radius:6px; }
+  .modal-close:hover { background:var(--bg3); color:var(--text); }
+  .modal-body { padding:20px 24px; }
+  .modal-footer { padding:16px 24px; border-top:1px solid var(--border); display:flex; gap:10px; justify-content:flex-end; }
+ 
+  .form-group { margin-bottom:16px; }
+  .form-label { display:block; font-size:12px; font-weight:600; color:var(--text2); margin-bottom:6px; }
+  .form-control {
+    width:100%; background:var(--bg3); border:1px solid var(--border);
+    border-radius:8px; padding:9px 12px; color:var(--text); font-size:13px;
+    font-family:inherit; outline:none; transition:border-color 0.2s;
+  }
+  .form-control:focus { border-color:var(--accent); }
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+ 
+  /* TABLE LAYOUT */
+  .table-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; padding:20px; }
+  .table-card {
+    background:var(--bg3); border:1px solid var(--border); border-radius:10px;
+    padding:16px; text-align:center; cursor:pointer; transition:all 0.2s;
+  }
+  .table-card:hover { border-color:var(--accent); transform:translateY(-2px); }
+  .table-card.occupied { border-color:rgba(239,68,68,0.5); background:rgba(239,68,68,0.07); }
+  .table-card.available { border-color:rgba(34,197,94,0.3); }
+  .table-num { font-size:22px; font-weight:800; font-family:'Space Mono',monospace; margin-bottom:6px; }
+  .table-status { font-size:11px; font-weight:600; }
+ 
+  /* AVATAR */
+  .avatar {
+    width:32px; height:32px; border-radius:8px; background:var(--accent-soft);
+    display:inline-flex; align-items:center; justify-content:center;
+    font-size:13px; font-weight:700; color:var(--accent); flex-shrink:0;
+  }
+  .user-cell { display:flex; align-items:center; gap:10px; }
+ 
+  /* TOAST */
+  .toast {
+    position:fixed; bottom:24px; right:24px; background:var(--bg2);
+    border:1px solid var(--green); border-radius:10px; padding:12px 18px;
+    font-size:13px; font-weight:500; color:var(--green); z-index:9999;
+    transform:translateY(80px); opacity:0; transition:all 0.3s;
+    display:flex; align-items:center; gap:8px;
+  }
+  .toast.show { transform:translateY(0); opacity:1; }
+ 
+  /* EMPTY */
+  .empty-state { text-align:center; padding:48px 20px; color:var(--text3); }
+  .empty-state .icon { font-size:36px; margin-bottom:12px; }
+ 
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width:6px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+ 
+  /* RESPONSIVE GRID */
+  .two-col { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  @media(max-width:1200px) { .stats-grid{grid-template-columns:repeat(2,1fr);} }
+</style>
+</head>
+<body>
+ 
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">🍜</div>
+    <h1>Quản Lý Nhà Hàng</h1>
+    <span>v1.0.0</span>
+  </div>
+  <div style="overflow-y:auto;flex:1;">
+    <div class="nav-section">
+      <div class="nav-label">Tổng quan</div>
+      <div class="nav-item active" onclick="navigate('dashboard',this)">
+        <span class="icon">📊</span> Dashboard
+      </div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Bán hàng</div>
+      <div class="nav-item" onclick="navigate('ban',this)">
+        <span class="icon">🪑</span> Quản lý Bàn
+        <span class="nav-badge" id="badge-ban">0</span>
+      </div>
+      <div class="nav-item" onclick="navigate('hoadonbanhang',this)">
+        <span class="icon">🧾</span> Hóa đơn bán hàng
+      </div>
+      <div class="nav-item" onclick="navigate('chitiethoadon',this)">
+        <span class="icon">📋</span> Chi tiết bán hàng
+      </div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Sản phẩm</div>
+      <div class="nav-item" onclick="navigate('sanpham',this)">
+        <span class="icon">🥘</span> Sản phẩm
+      </div>
+      <div class="nav-item" onclick="navigate('nguyenlieu',this)">
+        <span class="icon">🌿</span> Nguyên liệu
+      </div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Nhân sự</div>
+      <div class="nav-item" onclick="navigate('nhanvien',this)">
+        <span class="icon">👤</span> Nhân viên
+      </div>
+      <div class="nav-item" onclick="navigate('chamcong',this)">
+        <span class="icon">🕐</span> Chấm công
+      </div>
+      <div class="nav-item" onclick="navigate('phanquyen',this)">
+        <span class="icon">🔐</span> Phân quyền
+      </div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Hệ thống</div>
+      <div class="nav-item" onclick="navigate('khuvuc',this)">
+        <span class="icon">🗺️</span> Khu vực
+      </div>
+      <div class="nav-item" onclick="navigate('loaiphieu',this)">
+        <span class="icon">🏷️</span> Loại phiếu
+      </div>
+    </div>
+  </div>
+</div>
+ 
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbar-title">Dashboard</div>
+    <div class="topbar-actions">
+      <span style="font-size:12px;color:var(--text3);font-family:'Space Mono',monospace;" id="clock"></span>
+      <div style="width:32px;height:32px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;">A</div>
+    </div>
+  </div>
+ 
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="stats-grid">
+      <div class="stat-card orange">
+        <div class="stat-label">Doanh thu hôm nay</div>
+        <div class="stat-value" id="stat-doanhthu">0đ</div>
+        <div class="stat-sub">▲ Cập nhật liên tục</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-label">Bàn đang phục vụ</div>
+        <div class="stat-value" id="stat-ban">0</div>
+        <div class="stat-sub">Trên tổng số bàn</div>
+      </div>
+      <div class="stat-card gold">
+        <div class="stat-label">Sản phẩm</div>
+        <div class="stat-value" id="stat-sp">0</div>
+        <div class="stat-sub">Đang kinh doanh</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-label">Nhân viên</div>
+        <div class="stat-value" id="stat-nv">0</div>
+        <div class="stat-sub">Đang làm việc</div>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <div class="card-header"><h3>🧾 Hóa đơn gần đây</h3></div>
+        <table>
+          <thead><tr><th>Mã HĐ</th><th>Bàn</th><th>Nhân viên</th><th>Tổng tiền</th><th>Trạng thái</th></tr></thead>
+          <tbody id="recent-hoadon"></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3>🥘 Sản phẩm bán chạy</h3></div>
+        <table>
+          <thead><tr><th>Sản phẩm</th><th>Đơn giá</th><th>SL bán</th></tr></thead>
+          <tbody id="top-sp"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+ 
+  <!-- BAN -->
+  <div class="page" id="page-ban">
+    <div class="card">
+      <div class="card-header">
+        <h3>🪑 Quản lý Bàn</h3>
+        <select class="form-control" style="width:150px;" onchange="filterBan(this.value)">
+          <option value="">Tất cả khu vực</option>
+        </select>
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-ban')">+ Thêm bàn</button>
+      </div>
+      <div class="table-grid" id="ban-grid"></div>
+    </div>
+  </div>
+ 
+  <!-- HOA DON BAN HANG -->
+  <div class="page" id="page-hoadonbanhang">
+    <div class="card">
+      <div class="card-header">
+        <h3>🧾 Hóa đơn bán hàng</h3>
+        <input class="search-box" placeholder="Tìm kiếm..." oninput="filterTable('hdb-table',this.value)">
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-hdb')">+ Tạo hóa đơn</button>
+      </div>
+      <table id="hdb-table">
+        <thead><tr><th>Mã HĐ</th><th>Giờ vào</th><th>Giờ ra</th><th>Nhân viên</th><th>Bàn</th><th>Tổng tiền</th><th>Thao tác</th></tr></thead>
+        <tbody id="hdb-body"></tbody>
+      </table>
+    </div>
+  </div>
+ 
+  <!-- CHI TIET BAN HANG -->
+  <div class="page" id="page-chitiethoadon">
+    <div class="card">
+      <div class="card-header">
+        <h3>📋 Chi tiết bán hàng</h3>
+        <input class="search-box" placeholder="Tìm kiếm..." oninput="filterTable('ctbh-table',this.value)">
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-ctbh')">+ Thêm</button>
+      </div>
+      <table id="ctbh-table">
+        <thead><tr><th>Mã CT</th><th>Hóa đơn</th><th>Sản phẩm</th><th>Số lượng</th><th>Thành tiền</th><th>Thao tác</th></tr></thead>
+        <tbody id="ctbh-body"></tbody>
+      </table>
+    </div>
+  </div>
+ 
+  <!-- SAN PHAM -->
+  <div class="page" id="page-sanpham">
+    <div class="card">
+      <div class="card-header">
+        <h3>🥘 Sản phẩm</h3>
+        <input class="search-box" placeholder="Tìm kiếm..." oninput="filterTable('sp-table',this.value)">
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-sp')">+ Thêm SP</button>
+      </div>
+      <table id="sp-table">
+        <thead><tr><th>Mã SP</th><th>Tên SP</th><th>ĐVT</th><th>Đơn giá</th><th>Thao tác</th></tr></thead>
+        <tbody id="sp-body"></tbody>
+      </table>
+    </div>
+  </div>
+ 
+  <!-- NGUYEN LIEU -->
+  <div class="page" id="page-nguyenlieu">
+    <div class="card">
+      <div class="card-header">
+        <h3>🌿 Nguyên liệu</h3>
+        <input class="search-box" placeholder="Tìm kiếm..." oninput="filterTable('nl-table',this.value)">
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-nl')">+ Thêm NL</button>
+      </div>
+      <table id="nl-table">
+        <thead><tr><th>Mã NL</th><th>Tên NL</th><th>ĐVT</th><th>Đơn giá</th><th>Tồn kho</th><th>Thao tác</th></tr></thead>
+        <tbody id="nl-body"></tbody>
+      </table>
+    </div>
+  </div>
+ 
+  <!-- NHAN VIEN -->
+  <div class="page" id="page-nhanvien">
+    <div class="card">
+      <div class="card-header">
+        <h3>👤 Nhân viên</h3>
+        <input class="search-box" placeholder="Tìm kiếm..." oninput="filterTable('nv-table',this.value)">
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-nv')">+ Thêm NV</button>
+      </div>
+      <table id="nv-table">
+        <thead><tr><th>Mã NV</th><th>Họ tên</th><th>SĐT</th><th>CCCD</th><th>Phân quyền</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+        <tbody id="nv-body"></tbody>
+      </table>
+    </div>
+  </div>
+ 
+  <!-- CHAM CONG -->
+  <div class="page" id="page-chamcong">
+    <div class="card">
+      <div class="card-header">
+        <h3>🕐 Chấm công</h3>
+        <input class="search-box" placeholder="Tìm kiếm..." oninput="filterTable('cc-table',this.value)">
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-cc')">+ Ghi chấm công</button>
+      </div>
+      <table id="cc-table">
+        <thead><tr><th>Mã CC</th><th>Nhân viên</th><th>Ngày công</th><th>Tính công</th><th>Thao tác</th></tr></thead>
+        <tbody id="cc-body"></tbody>
+      </table>
+    </div>
+  </div>
+ 
+  <!-- PHAN QUYEN -->
+  <div class="page" id="page-phanquyen">
+    <div class="card">
+      <div class="card-header">
+        <h3>🔐 Phân quyền</h3>
+        <input class="search-box" placeholder="Tìm kiếm..." oninput="filterTable('pq-table',this.value)">
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-pq')">+ Thêm quyền</button>
+      </div>
+      <table id="pq-table">
+        <thead><tr><th>Mã PQ</th><th>Tên quyền</th><th>Mức lương</th><th>ĐVT</th><th>Thao tác</th></tr></thead>
+        <tbody id="pq-body"></tbody>
+      </table>
+    </div>
+  </div>
+ 
+  <!-- KHU VUC -->
+  <div class="page" id="page-khuvuc">
+    <div class="card">
+      <div class="card-header">
+        <h3>🗺️ Khu vực</h3>
+        <input class="search-box" placeholder="Tìm kiếm..." oninput="filterTable('kv-table',this.value)">
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-kv')">+ Thêm khu vực</button>
+      </div>
+      <table id="kv-table">
+        <thead><tr><th>Mã KV</th><th>Tên KV</th><th>Trạng thái</th><th>Số bàn</th><th>Thao tác</th></tr></thead>
+        <tbody id="kv-body"></tbody>
+      </table>
+    </div>
+  </div>
+ 
+  <!-- LOAI PHIEU -->
+  <div class="page" id="page-loaiphieu">
+    <div class="card">
+      <div class="card-header">
+        <h3>🏷️ Loại phiếu</h3>
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-lp')">+ Thêm</button>
+      </div>
+      <table>
+        <thead><tr><th>Mã LP</th><th>Tên LP</th><th>Thao tác</th></tr></thead>
+        <tbody id="lp-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div><!-- end main -->
+ 
+<!-- ===== MODALS ===== -->
+<!-- BAN -->
+<div class="modal-overlay" id="modal-ban">
+  <div class="modal">
+    <div class="modal-header"><h3>Thêm / Sửa Bàn</h3><button class="modal-close" onclick="closeModal('modal-ban')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Mã bàn</label><input class="form-control" id="ban-id" placeholder="B001"></div>
+        <div class="form-group"><label class="form-label">Khu vực</label>
+          <select class="form-control" id="ban-kv"></select>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Trạng thái</label>
+        <select class="form-control" id="ban-tt">
+          <option value="true">Còn trống</option>
+          <option value="false">Đang phục vụ</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-ban')">Huỷ</button>
+      <button class="btn btn-primary" onclick="saveBan()">Lưu</button>
+    </div>
+  </div>
+</div>
+ 
+<!-- SAN PHAM -->
+<div class="modal-overlay" id="modal-sp">
+  <div class="modal">
+    <div class="modal-header"><h3>Thêm Sản phẩm</h3><button class="modal-close" onclick="closeModal('modal-sp')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Mã SP</label><input class="form-control" id="sp-id" placeholder="SP001"></div>
+      <div class="form-group"><label class="form-label">Tên SP</label><input class="form-control" id="sp-ten" placeholder="Tên sản phẩm"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">ĐVT</label><input class="form-control" id="sp-dvt" placeholder="Phần, Ly, Tô..."></div>
+        <div class="form-group"><label class="form-label">Đơn giá (đ)</label><input class="form-control" type="number" id="sp-gia" placeholder="50000"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-sp')">Huỷ</button>
+      <button class="btn btn-primary" onclick="saveSP()">Lưu</button>
+    </div>
+  </div>
+</div>
+ 
+<!-- NGUYEN LIEU -->
+<div class="modal-overlay" id="modal-nl">
+  <div class="modal">
+    <div class="modal-header"><h3>Thêm Nguyên liệu</h3><button class="modal-close" onclick="closeModal('modal-nl')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Mã NL</label><input class="form-control" id="nl-id" placeholder="NL001"></div>
+        <div class="form-group"><label class="form-label">ĐVT</label><input class="form-control" id="nl-dvt" placeholder="kg, lít..."></div>
+      </div>
+      <div class="form-group"><label class="form-label">Tên NL</label><input class="form-control" id="nl-ten" placeholder="Tên nguyên liệu"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Đơn giá</label><input class="form-control" type="number" id="nl-gia" placeholder="0"></div>
+        <div class="form-group"><label class="form-label">Tồn kho</label><input class="form-control" type="number" id="nl-sl" placeholder="0"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-nl')">Huỷ</button>
+      <button class="btn btn-primary" onclick="saveNL()">Lưu</button>
+    </div>
+  </div>
+</div>
+ 
+<!-- HOA DON BAN HANG -->
+<div class="modal-overlay" id="modal-hdb">
+  <div class="modal">
+    <div class="modal-header"><h3>Tạo Hóa đơn bán hàng</h3><button class="modal-close" onclick="closeModal('modal-hdb')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Mã HĐ</label><input class="form-control" id="hdb-id" placeholder="HDB001"></div>
+        <div class="form-group"><label class="form-label">Bàn</label><select class="form-control" id="hdb-ban"></select></div>
+      </div>
+      <div class="form-group"><label class="form-label">Nhân viên</label><select class="form-control" id="hdb-nv"></select></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-hdb')">Huỷ</button>
+      <button class="btn btn-primary" onclick="saveHDB()">Lưu</button>
+    </div>
+  </div>
+</div>
+ 
+<!-- CHI TIET BAN HANG -->
+<div class="modal-overlay" id="modal-ctbh">
+  <div class="modal">
+    <div class="modal-header"><h3>Thêm Chi tiết bán hàng</h3><button class="modal-close" onclick="closeModal('modal-ctbh')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Mã CT</label><input class="form-control" id="ctbh-id" placeholder="CT001"></div>
+        <div class="form-group"><label class="form-label">Hóa đơn</label><select class="form-control" id="ctbh-hdb"></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Sản phẩm</label><select class="form-control" id="ctbh-sp"></select></div>
+        <div class="form-group"><label class="form-label">Số lượng</label><input class="form-control" type="number" id="ctbh-sl" value="1" min="1"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-ctbh')">Huỷ</button>
+      <button class="btn btn-primary" onclick="saveCTBH()">Lưu</button>
+    </div>
+  </div>
+</div>
+ 
+<!-- NHAN VIEN -->
+<div class="modal-overlay" id="modal-nv">
+  <div class="modal">
+    <div class="modal-header"><h3>Thêm Nhân viên</h3><button class="modal-close" onclick="closeModal('modal-nv')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Mã NV</label><input class="form-control" id="nv-id" placeholder="NV001"></div>
+        <div class="form-group"><label class="form-label">Phân quyền</label><select class="form-control" id="nv-pq"></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Họ</label><input class="form-control" id="nv-ho" placeholder="Nguyễn Văn"></div>
+        <div class="form-group"><label class="form-label">Tên</label><input class="form-control" id="nv-ten" placeholder="An"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">SĐT</label><input class="form-control" id="nv-sdt" placeholder="0909..."></div>
+        <div class="form-group"><label class="form-label">CCCD</label><input class="form-control" id="nv-cccd" placeholder="0123456789"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Tài khoản</label><input class="form-control" id="nv-tk" placeholder="username"></div>
+        <div class="form-group"><label class="form-label">Mật khẩu</label><input class="form-control" type="password" id="nv-mk" placeholder="••••••"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Trạng thái</label>
+        <select class="form-control" id="nv-tt">
+          <option value="true">Đang làm việc</option>
+          <option value="false">Nghỉ việc</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-nv')">Huỷ</button>
+      <button class="btn btn-primary" onclick="saveNV()">Lưu</button>
+    </div>
+  </div>
+</div>
+ 
+<!-- CHAM CONG -->
+<div class="modal-overlay" id="modal-cc">
+  <div class="modal">
+    <div class="modal-header"><h3>Ghi Chấm công</h3><button class="modal-close" onclick="closeModal('modal-cc')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Mã CC</label><input class="form-control" id="cc-id" placeholder="CC001"></div>
+        <div class="form-group"><label class="form-label">Nhân viên</label><select class="form-control" id="cc-nv"></select></div>
+      </div>
+      <div class="form-group"><label class="form-label">Ngày công</label><input class="form-control" type="date" id="cc-ngay"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-cc')">Huỷ</button>
+      <button class="btn btn-primary" onclick="saveCC()">Lưu</button>
+    </div>
+  </div>
+</div>
+ 
+<!-- PHAN QUYEN -->
+<div class="modal-overlay" id="modal-pq">
+  <div class="modal">
+    <div class="modal-header"><h3>Thêm Phân quyền</h3><button class="modal-close" onclick="closeModal('modal-pq')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Mã PQ</label><input class="form-control" id="pq-id" placeholder="PQ001"></div>
+        <div class="form-group"><label class="form-label">ĐVT lương</label><input class="form-control" id="pq-dvt" placeholder="Tháng, Ca..."></div>
+      </div>
+      <div class="form-group"><label class="form-label">Tên quyền</label><input class="form-control" id="pq-ten" placeholder="Quản lý, Thu ngân..."></div>
+      <div class="form-group"><label class="form-label">Mức lương</label><input class="form-control" type="number" id="pq-luong" placeholder="5000000"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-pq')">Huỷ</button>
+      <button class="btn btn-primary" onclick="savePQ()">Lưu</button>
+    </div>
+  </div>
+</div>
+ 
+<!-- KHU VUC -->
+<div class="modal-overlay" id="modal-kv">
+  <div class="modal">
+    <div class="modal-header"><h3>Thêm Khu vực</h3><button class="modal-close" onclick="closeModal('modal-kv')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Mã KV</label><input class="form-control" id="kv-id" placeholder="KV001"></div>
+        <div class="form-group"><label class="form-label">Trạng thái</label>
+          <select class="form-control" id="kv-tt">
+            <option value="Hoạt động">Hoạt động</option>
+            <option value="Tạm đóng">Tạm đóng</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Tên khu vực</label><input class="form-control" id="kv-ten" placeholder="Tầng 1, Ngoài trời..."></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-kv')">Huỷ</button>
+      <button class="btn btn-primary" onclick="saveKV()">Lưu</button>
+    </div>
+  </div>
+</div>
+ 
+<!-- LOAI PHIEU -->
+<div class="modal-overlay" id="modal-lp">
+  <div class="modal">
+    <div class="modal-header"><h3>Thêm Loại phiếu</h3><button class="modal-close" onclick="closeModal('modal-lp')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Mã LP</label><input class="form-control" id="lp-id" placeholder="LP001"></div>
+      <div class="form-group"><label class="form-label">Tên LP</label><input class="form-control" id="lp-ten" placeholder="Phiếu nhập, Phiếu xuất..."></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-lp')">Huỷ</button>
+      <button class="btn btn-primary" onclick="saveLP()">Lưu</button>
+    </div>
+  </div>
+</div>
+ 
+<!-- TOAST -->
+<div class="toast" id="toast">✓ <span id="toast-msg">Đã lưu thành công!</span></div>
+ 
+<script>
+// ========== DATA STORE ==========
+const db = {
+  khuvuc: [
+    {MaKV:'KV001', TenKV:'Tầng 1', TrangThai:'Hoạt động'},
+    {MaKV:'KV002', TenKV:'Tầng 2', TrangThai:'Hoạt động'},
+    {MaKV:'KV003', TenKV:'Ngoài trời', TrangThai:'Hoạt động'},
+  ],
+  ban: [
+    {MaBan:'B01', TrangThai:true, MaKV:'KV001'},
+    {MaBan:'B02', TrangThai:false, MaKV:'KV001'},
+    {MaBan:'B03', TrangThai:true, MaKV:'KV001'},
+    {MaBan:'B04', TrangThai:false, MaKV:'KV002'},
+    {MaBan:'B05', TrangThai:true, MaKV:'KV002'},
+    {MaBan:'B06', TrangThai:true, MaKV:'KV003'},
+  ],
+  sanpham: [
+    {MaSP:'SP001', TenSP:'Phở bò', Anh:'🍜', DVT:'Tô', DonGia:65000},
+    {MaSP:'SP002', TenSP:'Bún bò Huế', Anh:'🍲', DVT:'Tô', DonGia:60000},
+    {MaSP:'SP003', TenSP:'Cà phê sữa', Anh:'☕', DVT:'Ly', DonGia:30000},
+    {MaSP:'SP004', TenSP:'Nước ép cam', Anh:'🍊', DVT:'Ly', DonGia:35000},
+    {MaSP:'SP005', TenSP:'Chè ba màu', Anh:'🍮', DVT:'Ly', DonGia:25000},
+  ],
+  nguyenlieu: [
+    {MaNL:'NL001', TenNL:'Thịt bò', DVT:'kg', DonGia:250000, SL:20},
+    {MaNL:'NL002', TenNL:'Bánh phở', DVT:'kg', DonGia:30000, SL:50},
+    {MaNL:'NL003', TenNL:'Rau thơm', DVT:'kg', DonGia:15000, SL:10},
+  ],
+  phanquyen: [
+    {MaPQ:'PQ001', TenQuyen:'Quản lý', mucLuong:12000000, DVT:'Tháng'},
+    {MaPQ:'PQ002', TenQuyen:'Thu ngân', mucLuong:7000000, DVT:'Tháng'},
+    {MaPQ:'PQ003', TenQuyen:'Phục vụ', mucLuong:5500000, DVT:'Tháng'},
+    {MaPQ:'PQ004', TenQuyen:'Bếp trưởng', mucLuong:10000000, DVT:'Tháng'},
+  ],
+  nhanvien: [
+    {MaNV:'NV001', Ho:'Nguyễn Văn', Ten:'An', GioiTinh:true, SDT:'0901111111', CCCD:'012345678901', TrangThai:true, TaiKhoan:'admin', MatKhau:'123456', MaQP:'PQ001'},
+    {MaNV:'NV002', Ho:'Trần Thị', Ten:'Bình', GioiTinh:false, SDT:'0902222222', CCCD:'012345678902', TrangThai:true, TaiKhoan:'binhtran', MatKhau:'123456', MaQP:'PQ002'},
+    {MaNV:'NV003', Ho:'Lê Minh', Ten:'Cường', GioiTinh:true, SDT:'0903333333', CCCD:'012345678903', TrangThai:true, TaiKhoan:'cuongle', MatKhau:'123456', MaQP:'PQ003'},
+  ],
+  chamcong: [
+    {MaCC:'CC001', MaNV:'NV001', NgayCong:'2025-01-20'},
+    {MaCC:'CC002', MaNV:'NV002', NgayCong:'2025-01-20'},
+    {MaCC:'CC003', MaNV:'NV003', NgayCong:'2025-01-20'},
+  ],
+  hoadonbanhang: [
+    {MaHDBH:'HDB001', GioVao:'2025-01-20T08:00:00', GioRa:'2025-01-20T09:30:00', MaNV:'NV002', MaBan:'B02'},
+    {MaHDBH:'HDB002', GioVao:'2025-01-20T10:00:00', GioRa:'', MaNV:'NV003', MaBan:'B04'},
+  ],
+  chitiethoadon: [
+    {MaCTHD:'CT001', MaHDBH:'HDB001', MaSP:'SP001', SL:2},
+    {MaCTHD:'CT002', MaHDBH:'HDB001', MaSP:'SP003', SL:2},
+    {MaCTHD:'CT003', MaHDBH:'HDB002', MaSP:'SP002', SL:3},
+  ],
+  loaiphieu: [
+    {MaLP:'LP001', TenLP:'Phiếu nhập kho'},
+    {MaLP:'LP002', TenLP:'Phiếu xuất kho'},
+  ]
+};
+ 
+// ========== HELPERS ==========
+const fmt = n => n?.toLocaleString('vi-VN') + 'đ';
+const fmtNum = n => n?.toLocaleString('vi-VN');
+ 
+function tinhThanhTien(maSP, sl) {
+  const sp = db.sanpham.find(s => s.MaSP === maSP);
+  return sp ? sp.DonGia * sl : 0;
+}
+function tinhTongHDB(maHDB) {
+  return db.chitiethoadon.filter(ct => ct.MaHDBH === maHDB)
+    .reduce((s,ct) => s + tinhThanhTien(ct.MaSP, ct.SL), 0);
+}
+function getNV(id) { const nv=db.nhanvien.find(n=>n.MaNV===id); return nv?nv.Ho+' '+nv.Ten:id; }
+function getSP(id) { const sp=db.sanpham.find(s=>s.MaSP===id); return sp?sp.TenSP:id; }
+function getKV(id) { const k=db.khuvuc.find(x=>x.MaKV===id); return k?k.TenKV:id; }
+function getPQ(id) { const p=db.phanquyen.find(x=>x.MaPQ===id); return p?p.TenQuyen:id; }
+ 
+function showToast(msg='Đã lưu thành công!') {
+  const t=document.getElementById('toast');
+  document.getElementById('toast-msg').textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+ 
+function openModal(id) {
+  populateSelects();
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+ 
+document.querySelectorAll('.modal-overlay').forEach(m=>{
+  m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('open'); });
+});
+ 
+function populateSelects() {
+  const kvSel=document.getElementById('ban-kv');
+  if(kvSel){ kvSel.innerHTML=db.khuvuc.map(k=>`<option value="${k.MaKV}">${k.TenKV}</option>`).join(''); }
+  ['hdb-nv','cc-nv'].forEach(id=>{
+    const s=document.getElementById(id);
+    if(s) s.innerHTML=db.nhanvien.map(n=>`<option value="${n.MaNV}">${n.Ho} ${n.Ten}</option>`).join('');
+  });
+  const banSel=document.getElementById('hdb-ban');
+  if(banSel){ banSel.innerHTML=db.ban.map(b=>`<option value="${b.MaBan}">${b.MaBan} (${getKV(b.MaKV)})</option>`).join(''); }
+  const pqSel=document.getElementById('nv-pq');
+  if(pqSel){ pqSel.innerHTML=db.phanquyen.map(p=>`<option value="${p.MaPQ}">${p.TenQuyen}</option>`).join(''); }
+  const hdbSel=document.getElementById('ctbh-hdb');
+  if(hdbSel){ hdbSel.innerHTML=db.hoadonbanhang.map(h=>`<option value="${h.MaHDBH}">${h.MaHDBH}</option>`).join(''); }
+  const spSel=document.getElementById('ctbh-sp');
+  if(spSel){ spSel.innerHTML=db.sanpham.map(s=>`<option value="${s.MaSP}">${s.TenSP}</option>`).join(''); }
+}
+ 
+function filterTable(tableId, val) {
+  const rows=document.querySelectorAll(`#${tableId} tbody tr`);
+  const v=val.toLowerCase();
+  rows.forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(v)?'':'none';});
+}
+ 
+function filterBan(kv) { renderBan(kv); }
+ 
+// ========== NAVIGATE ==========
+function navigate(page, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  if(el) el.classList.add('active');
+  document.getElementById('topbar-title').textContent = el?.textContent.trim() || page;
+  renderPage(page);
+}
+ 
+function renderPage(p) {
+  if(p==='dashboard') renderDashboard();
+  else if(p==='ban') renderBan();
+  else if(p==='hoadonbanhang') renderHDB();
+  else if(p==='chitiethoadon') renderCTBH();
+  else if(p==='sanpham') renderSP();
+  else if(p==='nguyenlieu') renderNL();
+  else if(p==='nhanvien') renderNV();
+  else if(p==='chamcong') renderCC();
+  else if(p==='phanquyen') renderPQ();
+  else if(p==='khuvuc') renderKV();
+  else if(p==='loaiphieu') renderLP();
+}
+ 
+// ========== RENDER FUNCTIONS ==========
+function renderDashboard() {
+  const tongDT=db.hoadonbanhang.reduce((s,h)=>s+tinhTongHDB(h.MaHDBH),0);
+  const banDangDung=db.ban.filter(b=>!b.TrangThai).length;
+  document.getElementById('stat-doanhthu').textContent=fmt(tongDT);
+  document.getElementById('stat-ban').textContent=`${banDangDung}/${db.ban.length}`;
+  document.getElementById('stat-sp').textContent=db.sanpham.length;
+  document.getElementById('stat-nv').textContent=db.nhanvien.filter(n=>n.TrangThai).length;
+ 
+  const hdbRows=db.hoadonbanhang.slice(-5).reverse().map(h=>`
+    <tr>
+      <td><span style="font-family:'Space Mono',monospace;font-size:12px;color:var(--accent)">${h.MaHDBH}</span></td>
+      <td>${h.MaBan}</td>
+      <td>${getNV(h.MaNV)}</td>
+      <td style="color:var(--gold);font-weight:700;">${fmt(tinhTongHDB(h.MaHDBH))}</td>
+      <td><span class="badge ${h.GioRa?'badge-green':'badge-orange'}">${h.GioRa?'Đã thanh toán':'Đang dùng'}</span></td>
+    </tr>`).join('');
+  document.getElementById('recent-hoadon').innerHTML=hdbRows||'<tr><td colspan="5" class="empty-state">Chưa có hóa đơn</td></tr>';
+ 
+  const spRows=db.sanpham.slice(0,5).map(s=>`
+    <tr>
+      <td><span style="font-size:18px">${s.Anh}</span> ${s.TenSP}</td>
+      <td style="color:var(--gold)">${fmt(s.DonGia)}</td>
+      <td style="color:var(--green);font-weight:700;">${Math.floor(Math.random()*50+10)}</td>
+    </tr>`).join('');
+  document.getElementById('top-sp').innerHTML=spRows;
+}
+ 
+function renderBan(filterKV='') {
+  const grid=document.getElementById('ban-grid');
+  const list=filterKV ? db.ban.filter(b=>b.MaKV===filterKV) : db.ban;
+  grid.innerHTML=list.map(b=>`
+    <div class="table-card ${b.TrangThai?'available':'occupied'}" onclick="toggleBan('${b.MaBan}')">
+      <div class="table-num">${b.MaBan}</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:6px">${getKV(b.MaKV)}</div>
+      <div class="badge ${b.TrangThai?'badge-green':'badge-red'}" style="justify-content:center">
+        <span class="dot ${b.TrangThai?'dot-green':'dot-red'}"></span>
+        ${b.TrangThai?'Trống':'Đang dùng'}
+      </div>
+    </div>`).join('');
+ 
+  const sel=document.querySelector('#page-ban select');
+  if(sel&&sel.children.length<=1) {
+    db.khuvuc.forEach(k=>{ const o=document.createElement('option'); o.value=k.MaKV; o.textContent=k.TenKV; sel.appendChild(o); });
+  }
+ 
+  const busy=db.ban.filter(b=>!b.TrangThai).length;
+  document.getElementById('badge-ban').textContent=busy;
+  document.getElementById('stat-ban').textContent=`${busy}/${db.ban.length}`;
+}
+ 
+function toggleBan(id) {
+  const b=db.ban.find(x=>x.MaBan===id);
+  if(b){ b.TrangThai=!b.TrangThai; renderBan(); showToast(`Bàn ${id}: ${b.TrangThai?'Còn trống':'Đang phục vụ'}`); }
+}
+ 
+function renderHDB() {
+  document.getElementById('hdb-body').innerHTML=db.hoadonbanhang.map(h=>`
+    <tr>
+      <td><span style="font-family:'Space Mono',monospace;color:var(--accent)">${h.MaHDBH}</span></td>
+      <td>${new Date(h.GioVao).toLocaleString('vi-VN')}</td>
+      <td>${h.GioRa?new Date(h.GioRa).toLocaleString('vi-VN'):'<span class="badge badge-orange">Đang phục vụ</span>'}</td>
+      <td>${getNV(h.MaNV)}</td>
+      <td>${h.MaBan}</td>
+      <td style="color:var(--gold);font-weight:700;">${fmt(tinhTongHDB(h.MaHDBH))}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteItem('hoadonbanhang','MaHDBH','${h.MaHDBH}','renderHDB')">Xoá</button></td>
+    </tr>`).join('');
+}
+ 
+function renderCTBH() {
+  document.getElementById('ctbh-body').innerHTML=db.chitiethoadon.map(c=>`
+    <tr>
+      <td>${c.MaCTHD}</td>
+      <td>${c.MaHDBH}</td>
+      <td>${getSP(c.MaSP)}</td>
+      <td>${c.SL}</td>
+      <td style="color:var(--gold)">${fmt(tinhThanhTien(c.MaSP,c.SL))}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteItem('chitiethoadon','MaCTHD','${c.MaCTHD}','renderCTBH')">Xoá</button></td>
+    </tr>`).join('');
+}
+ 
+function renderSP() {
+  document.getElementById('sp-body').innerHTML=db.sanpham.map(s=>`
+    <tr>
+      <td><span style="font-family:'Space Mono',monospace">${s.MaSP}</span></td>
+      <td><span style="font-size:18px">${s.Anh}</span> ${s.TenSP}</td>
+      <td>${s.DVT}</td>
+      <td style="color:var(--gold);font-weight:700">${fmt(s.DonGia)}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteItem('sanpham','MaSP','${s.MaSP}','renderSP')">Xoá</button></td>
+    </tr>`).join('');
+  document.getElementById('stat-sp').textContent=db.sanpham.length;
+}
+ 
+function renderNL() {
+  document.getElementById('nl-body').innerHTML=db.nguyenlieu.map(n=>`
+    <tr>
+      <td><span style="font-family:'Space Mono',monospace">${n.MaNL}</span></td>
+      <td>${n.TenNL}</td>
+      <td>${n.DVT}</td>
+      <td style="color:var(--gold)">${fmt(n.DonGia)}</td>
+      <td><span class="badge ${n.SL>10?'badge-green':'badge-red'}">${fmtNum(n.SL)}</span></td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteItem('nguyenlieu','MaNL','${n.MaNL}','renderNL')">Xoá</button></td>
+    </tr>`).join('');
+}
+ 
+function renderNV() {
+  document.getElementById('nv-body').innerHTML=db.nhanvien.map(n=>`
+    <tr>
+      <td><span style="font-family:'Space Mono',monospace">${n.MaNV}</span></td>
+      <td>
+        <div class="user-cell">
+          <div class="avatar">${n.Ten[0]}</div>
+          ${n.Ho} ${n.Ten}
+        </div>
+      </td>
+      <td>${n.SDT}</td>
+      <td style="font-family:'Space Mono',monospace;font-size:12px">${n.CCCD}</td>
+      <td><span class="badge badge-blue">${getPQ(n.MaQP)}</span></td>
+      <td><span class="badge ${n.TrangThai?'badge-green':'badge-red'}"><span class="dot ${n.TrangThai?'dot-green':'dot-red'}"></span>${n.TrangThai?'Đang làm':'Nghỉ việc'}</span></td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteItem('nhanvien','MaNV','${n.MaNV}','renderNV')">Xoá</button></td>
+    </tr>`).join('');
+  document.getElementById('stat-nv').textContent=db.nhanvien.filter(n=>n.TrangThai).length;
+}
+ 
+function renderCC() {
+  document.getElementById('cc-body').innerHTML=db.chamcong.map(c=>`
+    <tr>
+      <td>${c.MaCC}</td>
+      <td>${getNV(c.MaNV)}</td>
+      <td>${c.NgayCong}</td>
+      <td><span class="badge badge-green">1 công</span></td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteItem('chamcong','MaCC','${c.MaCC}','renderCC')">Xoá</button></td>
+    </tr>`).join('');
+}
+ 
+function renderPQ() {
+  document.getElementById('pq-body').innerHTML=db.phanquyen.map(p=>`
+    <tr>
+      <td><span style="font-family:'Space Mono',monospace">${p.MaPQ}</span></td>
+      <td>${p.TenQuyen}</td>
+      <td style="color:var(--gold);font-weight:700">${fmt(p.mucLuong)}</td>
+      <td>${p.DVT}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteItem('phanquyen','MaPQ','${p.MaPQ}','renderPQ')">Xoá</button></td>
+    </tr>`).join('');
+}
+ 
+function renderKV() {
+  document.getElementById('kv-body').innerHTML=db.khuvuc.map(k=>`
+    <tr>
+      <td><span style="font-family:'Space Mono',monospace">${k.MaKV}</span></td>
+      <td>${k.TenKV}</td>
+      <td><span class="badge ${k.TrangThai==='Hoạt động'?'badge-green':'badge-red'}">${k.TrangThai}</span></td>
+      <td>${db.ban.filter(b=>b.MaKV===k.MaKV).length}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteItem('khuvuc','MaKV','${k.MaKV}','renderKV')">Xoá</button></td>
+    </tr>`).join('');
+}
+ 
+function renderLP() {
+  document.getElementById('lp-body').innerHTML=db.loaiphieu.map(l=>`
+    <tr>
+      <td><span style="font-family:'Space Mono',monospace">${l.MaLP}</span></td>
+      <td>${l.TenLP}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteItem('loaiphieu','MaLP','${l.MaLP}','renderLP')">Xoá</button></td>
+    </tr>`).join('');
+}
+ 
+// ========== SAVE FUNCTIONS ==========
+function saveBan() {
+  const id=document.getElementById('ban-id').value.trim();
+  const kv=document.getElementById('ban-kv').value;
+  const tt=document.getElementById('ban-tt').value==='true';
+  if(!id){alert('Vui lòng nhập mã bàn');return;}
+  db.ban.push({MaBan:id,TrangThai:tt,MaKV:kv});
+  closeModal('modal-ban'); renderBan(); showToast('Đã thêm bàn '+id);
+}
+function saveSP() {
+  const id=document.getElementById('sp-id').value.trim();
+  const ten=document.getElementById('sp-ten').value.trim();
+  const dvt=document.getElementById('sp-dvt').value.trim();
+  const gia=+document.getElementById('sp-gia').value;
+  if(!id||!ten){alert('Vui lòng điền đầy đủ');return;}
+  db.sanpham.push({MaSP:id,TenSP:ten,Anh:'🍽️',DVT:dvt,DonGia:gia});
+  closeModal('modal-sp'); renderSP(); showToast('Đã thêm '+ten);
+}
+function saveNL() {
+  const id=document.getElementById('nl-id').value.trim();
+  const ten=document.getElementById('nl-ten').value.trim();
+  const dvt=document.getElementById('nl-dvt').value.trim();
+  const gia=+document.getElementById('nl-gia').value;
+  const sl=+document.getElementById('nl-sl').value;
+  if(!id||!ten){alert('Vui lòng điền đầy đủ');return;}
+  db.nguyenlieu.push({MaNL:id,TenNL:ten,DVT:dvt,DonGia:gia,SL:sl});
+  closeModal('modal-nl'); renderNL(); showToast('Đã thêm '+ten);
+}
+function saveHDB() {
+  const id=document.getElementById('hdb-id').value.trim();
+  const nv=document.getElementById('hdb-nv').value;
+  const ban=document.getElementById('hdb-ban').value;
+  if(!id){alert('Vui lòng nhập mã');return;}
+  db.hoadonbanhang.push({MaHDBH:id,GioVao:new Date().toISOString(),GioRa:'',MaNV:nv,MaBan:ban});
+  const b=db.ban.find(x=>x.MaBan===ban); if(b) b.TrangThai=false;
+  closeModal('modal-hdb'); renderHDB(); showToast('Đã tạo hóa đơn '+id);
+}
+function saveCTBH() {
+  const id=document.getElementById('ctbh-id').value.trim();
+  const hdb=document.getElementById('ctbh-hdb').value;
+  const sp=document.getElementById('ctbh-sp').value;
+  const sl=+document.getElementById('ctbh-sl').value;
+  if(!id){alert('Vui lòng nhập mã');return;}
+  db.chitiethoadon.push({MaCTHD:id,MaHDBH:hdb,MaSP:sp,SL:sl});
+  closeModal('modal-ctbh'); renderCTBH(); showToast('Đã thêm chi tiết');
+}
+function saveNV() {
+  const id=document.getElementById('nv-id').value.trim();
+  const ho=document.getElementById('nv-ho').value.trim();
+  const ten=document.getElementById('nv-ten').value.trim();
+  const sdt=document.getElementById('nv-sdt').value.trim();
+  const cccd=document.getElementById('nv-cccd').value.trim();
+  const tk=document.getElementById('nv-tk').value.trim();
+  const mk=document.getElementById('nv-mk').value;
+  const pq=document.getElementById('nv-pq').value;
+  const tt=document.getElementById('nv-tt').value==='true';
+  if(!id||!ho||!ten){alert('Vui lòng điền đầy đủ');return;}
+  db.nhanvien.push({MaNV:id,Ho:ho,Ten:ten,GioiTinh:true,SDT:sdt,CCCD:cccd,TrangThai:tt,TaiKhoan:tk,MatKhau:mk,MaQP:pq});
+  closeModal('modal-nv'); renderNV(); showToast('Đã thêm NV '+ho+' '+ten);
+}
+function saveCC() {
+  const id=document.getElementById('cc-id').value.trim();
+  const nv=document.getElementById('cc-nv').value;
+  const ngay=document.getElementById('cc-ngay').value;
+  if(!id){alert('Vui lòng nhập mã');return;}
+  db.chamcong.push({MaCC:id,MaNV:nv,NgayCong:ngay});
+  closeModal('modal-cc'); renderCC(); showToast('Đã ghi chấm công');
+}
+function savePQ() {
+  const id=document.getElementById('pq-id').value.trim();
+  const ten=document.getElementById('pq-ten').value.trim();
+  const luong=+document.getElementById('pq-luong').value;
+  const dvt=document.getElementById('pq-dvt').value.trim();
+  if(!id||!ten){alert('Vui lòng điền đầy đủ');return;}
+  db.phanquyen.push({MaPQ:id,TenQuyen:ten,mucLuong:luong,DVT:dvt});
+  closeModal('modal-pq'); renderPQ(); showToast('Đã thêm quyền '+ten);
+}
+function saveKV() {
+  const id=document.getElementById('kv-id').value.trim();
+  const ten=document.getElementById('kv-ten').value.trim();
+  const tt=document.getElementById('kv-tt').value;
+  if(!id||!ten){alert('Vui lòng điền đầy đủ');return;}
+  db.khuvuc.push({MaKV:id,TenKV:ten,TrangThai:tt});
+  closeModal('modal-kv'); renderKV(); showToast('Đã thêm khu vực '+ten);
+}
+function saveLP() {
+  const id=document.getElementById('lp-id').value.trim();
+  const ten=document.getElementById('lp-ten').value.trim();
+  if(!id||!ten){alert('Vui lòng điền đầy đủ');return;}
+  db.loaiphieu.push({MaLP:id,TenLP:ten});
+  closeModal('modal-lp'); renderLP(); showToast('Đã thêm '+ten);
+}
+ 
+function deleteItem(table, key, val, renderFn) {
+  if(!confirm('Xác nhận xoá?')) return;
+  db[table]=db[table].filter(x=>x[key]!==val);
+  eval(renderFn+'()');
+  showToast('Đã xoá!');
+}
+ 
+// ========== CLOCK ==========
+function updateClock() {
+  const now=new Date();
+  document.getElementById('clock').textContent=now.toLocaleTimeString('vi-VN');
+}
+setInterval(updateClock,1000); updateClock();
+ 
+// ========== INIT ==========
+renderDashboard();
+</script>
+</body>
+</html>
