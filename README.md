@@ -8,8 +8,9 @@
 
 2.	Yêu cầu
 -	Hệ điều hành: MacOS, Windows10- 11, Linux
-3.	Mô hình hóa dự án ( UML ) 
+3.	Sơ đồ UML
 
+<img width="881" height="732" alt="701888844_27183896301233924_3285500143628248412_n (1)" src="https://github.com/user-attachments/assets/9c525b71-30a1-4db3-b6ba-e63b4bef8aef" />
 
 
 
