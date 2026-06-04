@@ -1,5 +1,5 @@
-                                                     Hệ thống quản lý quán coffee
-                            Theo dõi bàn, hóa đơn bán hàng, chi tiết bán hàng, nhân viên chấm công , nhà cung cấp
+                                            Hệ thống quản lý quán coffee
+                  Theo dõi bàn, hóa đơn bán hàng, chi tiết bán hàng, nhân viên chấm công , nhà cung cấp
 
 🌟	Điểm Mạnh & Tính Năng Nổi Bật: 
 1. Kiến trúc tổng thể rất gọn gàng: một SPA hoàn chỉnh không cần framework, không cần server — chỉ một file HTML duy nhất chạy được ngay trên trình duyệt. Điều này cực kỳ dễ triển khai và chia sẻ.
